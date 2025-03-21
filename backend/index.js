@@ -1,20 +1,13 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import pkg from "pg";
+import jobRoutes from './routes/jobRoutes.js'; // ✅ No curly braces for default export
+import authRoutes from "./routes/authRoutes.js"; // ✅ No curly braces for default export
+import { pool } from "./db.js";
+
+
 
 dotenv.config(); // Load environment variables from .env file
-
-const { Pool } = pkg; // Imports PostgreSQL's connection pool.
-
-// Connect to PostgreSQL database
-const pool = new Pool({
-    user: process.env.PG_USER,
-    host: process.env.PG_HOST,
-    database: process.env.PG_DATABASE,
-    password: process.env.PG_PASSWORD,
-    port: process.env.PG_PORT,
-});
 
 // Testing database connection
 pool.connect()
@@ -24,6 +17,8 @@ pool.connect()
 const app = express(); // Create an Express app
 app.use(cors()); // Enable CORS so the frontend can send requests
 app.use(express.json()); // for API requests
+app.use('/api', jobRoutes);
+app.use("/api/auth", authRoutes); // Use auth routes
 
 // Test Route using (GET /)
 app.get("/", async (req, res) => {

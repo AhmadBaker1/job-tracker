@@ -1,84 +1,92 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import { fetchJobs, addJob, updateJob, deleteJob } from "../api/jobApi";
+import toast from 'react-hot-toast'; // This gives us access to toast.success() and toast.error()
+import AuthContext from "./context/AuthContext"; // ✅ Import Auth Context
+import Login from "./pages/Login";
+import SignUp from "./pages/SignUp";
 
 
 
 function App() {
+  const { user, logout } = useContext(AuthContext); // ✅ Get the logged-in user & logout function
   const [jobs, setJobs] = useState([]);
   const [allJobs, setAllJobs] = useState([]);
   const [newJob, setNewJob] = useState({ company: "", position: "", status: "Applied", notes: "" });
   const [editingJob, setEditingJob] = useState(null);
 
+  // ✅ Fetch jobs when the user logs in
   useEffect(() => {
-    const loadJobs = async () => {
-      const data = await fetchJobs(); // Fetch from API
-      setJobs(data);  // Displayed jobs (filtered)
-      setAllJobs(data); // Store the full job list (for restoring later)
-    };
-  
-    loadJobs();
-  }, []);
+    if (user) {
+      const loadJobs = async () => {
+        const token = user.token; // ✅ Get token from user
+        const data = await fetchJobs(token); // ✅ Pass token to API
+        setJobs(data);
+        setAllJobs(data);
+      };
 
- 
+      loadJobs();
+    }
+  }, [user]);
 
+  // ✅ Redirect to login page if no user is logged in
+  if (!user) {
+    return <Login />;
+  }
+
+  // ✅ Add Job (Now sends the user's token)
   const handleAddJob = async () => {
     if (!newJob.company || !newJob.position) return;
   
-    const addedJob = await addJob(newJob);
+    const token = user.token;
+    const addedJob = await addJob(newJob, token); // ✅ Pass token to API
     if (addedJob) {
-      setJobs([...jobs, addedJob]);     // Updates the displayed list
-      setAllJobs([...allJobs, addedJob]); // Also updates the full stored list
-  
-      // Reset the input fields
+      setJobs([...jobs, addedJob]);
+      setAllJobs([...allJobs, addedJob]);
       setNewJob({ company: "", position: "", status: "Applied", notes: "" });
+      toast.success("Job added successfully!");
+    } else {
+      toast.error("Failed to add job. Please try again.");
     }
   };
-  
-  
 
+  // ✅ Update Job (Now sends the user's token)
   const handleUpdateJob = async () => {
     if (!editingJob.company || !editingJob.position) return;
   
-    const updatedJob = await updateJob(editingJob.id, editingJob);
+    const token = user.token;
+    const updatedJob = await updateJob(editingJob.id, editingJob, token); // ✅ Pass token to API
     if (updatedJob) {
       setJobs(jobs.map((job) => (job.id === updatedJob.id ? updatedJob : job)));
       setAllJobs(allJobs.map((job) => (job.id === updatedJob.id ? updatedJob : job)));
-  
       setEditingJob(null);
+      toast.success("Job updated successfully!");
+    } else {
+      toast.error("Failed to update job. Please try again.");
     }
   };
-  
-  
-  
+
+  // ✅ Delete Job (Now sends the user's token)
   const handleDeleteJob = async (id) => {
-    const success = await deleteJob(id);
+    const token = user.token;
+    const success = await deleteJob(id, token); // ✅ Pass token to API
     if (success) {
-      setJobs(jobs.filter((job) => job.id !== id)); 
-      setAllJobs(allJobs.filter((job) => job.id !== id)); 
+      setJobs(jobs.filter((job) => job.id !== id));
+      setAllJobs(allJobs.filter((job) => job.id !== id));
+      toast.success("Job deleted successfully!");
+    } else {
+      toast.error("Failed to delete job. Please try again.");
     }
   };
-  
-  
+
+  // ✅ Filter Jobs by Status
   const handleFilter = (status) => {
     if (status === "") {
-      setJobs(allJobs); // Restore full job list when filter is removed
+      setJobs(allJobs);
     } else {
       setJobs(allJobs.filter((job) => job.status === status));
     }
   };
-  
-  
 
-  // Load jobs from Local Storage when the page loads
-useEffect(() => {
-  const savedJobs = JSON.parse(localStorage.getItem("jobs"));
-  if (savedJobs) setJobs(savedJobs);
-}, []);
-
-// Save jobs to Local Storage whenever the jobs list changes
-useEffect(() => {
-  localStorage.setItem("jobs", JSON.stringify(jobs));
-}, [jobs]);
 
   return (
     <div className="min-h-screen flex flex-col items-center bg-gray-100 p-6 text-gray-700">
@@ -86,6 +94,11 @@ useEffect(() => {
       <h1 className="text-4xl font-bold text-gray-800 flex items-center gap-2 mb-6">
         📌 <span>Job Tracker</span>
       </h1>
+
+      {/* ✅ Add Logout Button */}
+      <button onClick={logout} className="bg-red-500 hover:bg-red-600 text-white font-semibold px-4 py-2 rounded-md">
+        Logout
+      </button>
 
       {/* Add Job Form */}
       <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-lg">
@@ -185,11 +198,9 @@ useEffect(() => {
                     </div>
                   </div>
                 ) : (
-                  <li>
-                    <div>
-                      <span className="block text-lg font-semibold">{job.position}</span>
-                      <span className="text-gray-600">{job.company} ({job.status})</span>
-                    </div>
+                  <div>
+                    <span className="block text-lg font-semibold">{job.position}</span>
+                    <span className="text-gray-600">{job.company} ({job.status})</span>
                     <div className="flex gap-2">
                       <button
                         onClick={() => setEditingJob(job)}
@@ -204,7 +215,7 @@ useEffect(() => {
                         🗑️ Delete
                       </button>
                     </div>
-                  </li>
+                  </div>
                 )}
               </li>
             ))}

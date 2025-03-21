@@ -30,6 +30,11 @@ body {
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
+  background-image: url('./assets/jobtrack.png'); /* ✅ Update with the correct image path */
+  background-size: cover; /* Ensures it covers the full page */
+  background-position: center; /* Centers the image */
+  background-attachment: fixed; /* Keeps it fixed while scrolling */
+  background-repeat: no-repeat; /* Prevents tiling */
 }
 
 h1 {
