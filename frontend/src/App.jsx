@@ -11,6 +11,7 @@ function App() {
   const { user, logout } = useContext(AuthContext); // ✅ Get the logged-in user & logout function
   const [showLogin, setShowLogin] = useState(false); // default to SignUp
   const [jobs, setJobs] = useState([]);
+  const [activeTab, setActiveTab] = useState("All");
   const [allJobs, setAllJobs] = useState([]);
   const [newJob, setNewJob] = useState({ company: "", position: "", status: "Applied", notes: "" });
   const [editingJob, setEditingJob] = useState(null);
@@ -129,7 +130,7 @@ function App() {
             value={newJob.position}
             onChange={(e) => setNewJob({ ...newJob, position: e.target.value })}
             className="border border-gray-300 rounded-md p-2 w-1/2 focus:ring focus:ring-blue-200 text-gray-700"
-          />
+          /> 
         </div>
         <button
           onClick={handleAddJob}
@@ -140,28 +141,24 @@ function App() {
       </div>
 
       {/* Sorting & Filtering */}
-      <div className="flex justify-between w-full max-w-2xl mb-4 gap-4">
-        <select
-          onChange={(e) =>
-            setJobs([...jobs].sort((a, b) => a[e.target.value].localeCompare(b[e.target.value])))
-          }
-          className="border border-gray-300 rounded-md p-2 text-gray-700 w-1/2"
-        >
-          <option value="company">Sort by Company</option>
-          <option value="position">Sort by Position</option>
-          <option value="status">Sort by Status</option>
-        </select>
-
-        <select
-          onChange={(e) => handleFilter(e.target.value)}
-          className="border border-gray-300 rounded-md p-2 text-gray-700 w-1/2"
-        >
-          <option value="">Show All</option>
-          <option value="Applied">Applied</option>
-          <option value="Interview">Interview</option>
-          <option value="Offer">Offer</option>
-          <option value="Rejected">Rejected</option>
-        </select>
+      <div className="flex gap-2 mb-6 w-full max-w-2xl justify-center">
+        {["All", "Applied", "Interview", "Offer", "Rejected"].map((tab) => (
+          <button
+            key={tab}
+            onClick={() => {
+              setActiveTab(tab);
+              handleFilter(tab === "All" ? "" : tab);
+            }}
+            className={`px-4 py-2 rounded-full font-medium transition-all duration-200 shadow-sm
+              ${
+                activeTab === tab
+                  ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-md"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+              }`}
+          >
+            {tab}
+          </button>
+        ))}
       </div>
 
       {/* Job List */}
