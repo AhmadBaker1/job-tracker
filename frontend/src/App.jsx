@@ -9,6 +9,7 @@ import SignUp from "./pages/SignUp";
 
 function App() {
   const { user, logout } = useContext(AuthContext); // ✅ Get the logged-in user & logout function
+  const [showLogin, setShowLogin] = useState(false); // default to SignUp
   const [jobs, setJobs] = useState([]);
   const [allJobs, setAllJobs] = useState([]);
   const [newJob, setNewJob] = useState({ company: "", position: "", status: "Applied", notes: "" });
@@ -29,16 +30,24 @@ function App() {
   }, [user]);
 
   // ✅ Redirect to login page if no user is logged in
+  
+
   if (!user) {
-    return <Login />;
+    return showLogin ? (
+      <Login onSwitch={() => setShowLogin(false)} />
+    ) : (
+      <SignUp onSwitch={() => setShowLogin(true)} />
+    );
   }
+  
 
   // ✅ Add Job (Now sends the user's token)
   const handleAddJob = async () => {
     if (!newJob.company || !newJob.position) return;
   
-    const token = user.token;
-    const addedJob = await addJob(newJob, token); // ✅ Pass token to API
+    const token = user.token; // ✅ Get token from context/localStorage
+    const addedJob = await addJob(newJob, token); // ✅ Send to API
+  
     if (addedJob) {
       setJobs([...jobs, addedJob]);
       setAllJobs([...allJobs, addedJob]);
@@ -89,141 +98,145 @@ function App() {
 
 
   return (
-    <div className="min-h-screen flex flex-col items-center bg-gray-100 p-6 text-gray-700">
-      {/* Title */}
-      <h1 className="text-4xl font-bold text-gray-800 flex items-center gap-2 mb-6">
-        📌 <span>Job Tracker</span>
-      </h1>
-
-      {/* ✅ Add Logout Button */}
-      <button onClick={logout} className="bg-red-500 hover:bg-red-600 text-white font-semibold px-4 py-2 rounded-md">
-        Logout
-      </button>
+    <div className="min-h-screen bg-gradient-to-br from-blue-100 to-purple-100 p-6 flex flex-col items-center">
+      {/* Header */}
+      <div className="flex justify-between items-center w-full max-w-4xl mb-6">
+        <h1 className="text-4xl font-bold text-gray-800 flex items-center gap-2">
+          📌 Job Tracker
+        </h1>
+        <button
+          onClick={logout}
+          className="bg-red-500 hover:bg-red-600 text-white font-medium px-4 py-2 rounded-lg"
+        >
+          Logout
+        </button>
+      </div>
 
       {/* Add Job Form */}
-      <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-lg">
+      <div className="bg-white p-6 rounded-2xl shadow-xl w-full max-w-2xl mb-6">
         <h2 className="text-2xl font-semibold mb-4 text-gray-700">Add New Job</h2>
-        <input
-          type="text"
-          placeholder="Company"
-          value={newJob.company}
-          onChange={(e) => setNewJob({ ...newJob, company: e.target.value })}
-          className="border border-gray-300 rounded-md p-2 w-full mb-3 focus:ring focus:ring-blue-200 text-gray-700"
-        />
-        <input
-          type="text"
-          placeholder="Position"
-          value={newJob.position}
-          onChange={(e) => setNewJob({ ...newJob, position: e.target.value })}
-          className="border border-gray-300 rounded-md p-2 w-full mb-3 focus:ring focus:ring-blue-200 text-gray-700"
-        />
+        <div className="flex gap-4 mb-4">
+          <input
+            type="text"
+            placeholder="Company"
+            value={newJob.company}
+            onChange={(e) => setNewJob({ ...newJob, company: e.target.value })}
+            className="border border-gray-300 rounded-md p-2 w-1/2 focus:ring focus:ring-blue-200 text-gray-700"
+          />
+          <input
+            type="text"
+            placeholder="Position"
+            value={newJob.position}
+            onChange={(e) => setNewJob({ ...newJob, position: e.target.value })}
+            className="border border-gray-300 rounded-md p-2 w-1/2 focus:ring focus:ring-blue-200 text-gray-700"
+          />
+        </div>
         <button
           onClick={handleAddJob}
-          className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-4 py-2 rounded-md w-full flex items-center justify-center gap-2"
+          className="w-full bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-semibold py-2 rounded-md transition"
         >
           ➕ Add Job
         </button>
       </div>
 
       {/* Sorting & Filtering */}
-<div className="flex justify-between w-full max-w-lg mt-4">
-  {/* Sorting */}
-  <select
-    onChange={(e) => setJobs([...jobs].sort((a, b) => a[e.target.value].localeCompare(b[e.target.value])))}
-    className="border border-gray-300 rounded-md p-2 text-gray-700"
-  >
-    <option value="company">Sort by Company</option>
-    <option value="position">Sort by Position</option>
-    <option value="status">Sort by Status</option>
-  </select>
+      <div className="flex justify-between w-full max-w-2xl mb-4 gap-4">
+        <select
+          onChange={(e) =>
+            setJobs([...jobs].sort((a, b) => a[e.target.value].localeCompare(b[e.target.value])))
+          }
+          className="border border-gray-300 rounded-md p-2 text-gray-700 w-1/2"
+        >
+          <option value="company">Sort by Company</option>
+          <option value="position">Sort by Position</option>
+          <option value="status">Sort by Status</option>
+        </select>
 
-  {/* Filtering */}
-  <select
-  onChange={(e) => handleFilter(e.target.value)}
-  className="border border-gray-300 rounded-md p-2 text-gray-700"
->
-  <option value="">Show All</option>
-  <option value="Applied">Applied</option>
-  <option value="Interview">Interview</option>
-  <option value="Offer">Offer</option>
-  <option value="Rejected">Rejected</option>
-</select>
-</div>
+        <select
+          onChange={(e) => handleFilter(e.target.value)}
+          className="border border-gray-300 rounded-md p-2 text-gray-700 w-1/2"
+        >
+          <option value="">Show All</option>
+          <option value="Applied">Applied</option>
+          <option value="Interview">Interview</option>
+          <option value="Offer">Offer</option>
+          <option value="Rejected">Rejected</option>
+        </select>
+      </div>
 
-{/* Job List */}
-<div className="w-full max-w-lg mt-6">
+      {/* Job List */}
+      <div className="w-full max-w-2xl space-y-4">
         {jobs.length === 0 ? (
-          <p className="text-gray-500 text-center mt-4">No jobs added yet.</p>
+          <p className="text-gray-500 text-center">No jobs added yet.</p>
         ) : (
-          <ul className="space-y-4">
-            {jobs.map((job) => (
-              <li key={job.id} className="bg-white p-4 shadow-md rounded-lg flex justify-between items-center">
-                {editingJob && editingJob.id === job.id ? (
-                  <div className="flex flex-col gap-2 w-full">
-                    <input
-                      type="text"
-                      value={editingJob.company}
-                      onChange={(e) => setEditingJob({ ...editingJob, company: e.target.value })}
-                      className="border border-gray-300 rounded-md p-2 w-full text-gray-700"
-                    />
-                    <input
-                      type="text"
-                      value={editingJob.position}
-                      onChange={(e) => setEditingJob({ ...editingJob, position: e.target.value })}
-                      className="border border-gray-300 rounded-md p-2 w-full text-gray-700"
-                    />
-                    <select
-                      value={editingJob.status}
-                      onChange={(e) => setEditingJob({ ...editingJob, status: e.target.value })}
-                      className="border border-gray-300 rounded-md p-2 w-full text-gray-700"
+          jobs.map((job) => (
+            <div key={job.id} className="bg-white p-4 shadow-md rounded-xl">
+              {editingJob && editingJob.id === job.id ? (
+                <div className="space-y-2">
+                  <input
+                    type="text"
+                    value={editingJob.company}
+                    onChange={(e) => setEditingJob({ ...editingJob, company: e.target.value })}
+                    className="border border-gray-300 rounded-md p-2 w-full text-gray-700"
+                  />
+                  <input
+                    type="text"
+                    value={editingJob.position}
+                    onChange={(e) => setEditingJob({ ...editingJob, position: e.target.value })}
+                    className="border border-gray-300 rounded-md p-2 w-full text-gray-700"
+                  />
+                  <select
+                    value={editingJob.status}
+                    onChange={(e) => setEditingJob({ ...editingJob, status: e.target.value })}
+                    className="border border-gray-300 rounded-md p-2 w-full text-gray-700"
+                  >
+                    <option>Applied</option>
+                    <option>Interview</option>
+                    <option>Offer</option>
+                    <option>Rejected</option>
+                  </select>
+                  <div className="flex gap-2 mt-2">
+                    <button
+                      onClick={handleUpdateJob}
+                      className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md w-full"
                     >
-                      <option>Applied</option>
-                      <option>Interview</option>
-                      <option>Offer</option>
-                      <option>Rejected</option>
-                    </select>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={handleUpdateJob}
-                        className="bg-green-500 hover:bg-green-600 text-white font-semibold px-4 py-2 rounded-md w-full"
-                      >
-                        ✅ Save
-                      </button>
-                      <button
-                        onClick={() => setEditingJob(null)}
-                        className="bg-gray-500 hover:bg-gray-600 text-white font-semibold px-4 py-2 rounded-md w-full"
-                      >
-                        ❌ Cancel
-                      </button>
-                    </div>
+                      ✅ Save
+                    </button>
+                    <button
+                      onClick={() => setEditingJob(null)}
+                      className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md w-full"
+                    >
+                      ❌ Cancel
+                    </button>
                   </div>
-                ) : (
+                </div>
+              ) : (
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                   <div>
-                    <span className="block text-lg font-semibold">{job.position}</span>
-                    <span className="text-gray-600">{job.company} ({job.status})</span>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => setEditingJob(job)}
-                        className="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold px-3 py-1 rounded-md"
-                      >
-                        ✏️ Edit
-                      </button>
-                      <button
-                        onClick={() => handleDeleteJob(job.id)}
-                        className="bg-red-500 hover:bg-red-600 text-white font-semibold px-3 py-1 rounded-md"
-                      >
-                        🗑️ Delete
-                      </button>
-                    </div>
+                    <h3 className="text-lg font-semibold text-gray-800">{job.position}</h3>
+                    <p className="text-gray-600 text-sm">{job.company} ({job.status})</p>
                   </div>
-                )}
-              </li>
-            ))}
-          </ul>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setEditingJob(job)}
+                      className="bg-yellow-500 hover:bg-yellow-600 text-white font-medium px-3 py-1 rounded-md"
+                    >
+                      ✏️ Edit
+                    </button>
+                    <button
+                      onClick={() => handleDeleteJob(job.id)}
+                      className="bg-red-500 hover:bg-red-600 text-white font-medium px-3 py-1 rounded-md"
+                    >
+                      🗑️ Delete
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          ))
         )}
       </div>
     </div>
-  
   );
 }
 
