@@ -15,7 +15,10 @@ pool.connect()
     .catch((err) => console.error('Error connecting to PostgreSQL database:', err));
 
 const app = express(); // Create an Express app
-app.use(cors()); // Enable CORS so the frontend can send requests
+app.use(cors({
+    origin: 'https://job-tracker-cyan.vercel.app', // ✅ Your Vercel frontend URL
+    credentials: true 
+  }));
 app.use(express.json()); // for API requests
 app.use('/api/jobs', jobRoutes);
 app.use("/api/auth", authRoutes); // Use auth routes
