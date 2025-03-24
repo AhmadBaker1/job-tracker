@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:5000/jobs'; // URL of the API
+const API_URL = 'https://job-tracker-backend-6c2x.onrender.com/api/jobs'; // URL of the API
 
 // 🔐 Helper to get token from localStorage
 const getToken = () => {
@@ -52,7 +52,7 @@ export const updateJob = async (id, job, token) => {
   }
 
   try {
-    const response = await fetch(`http://localhost:5000/jobs/${id}`, {
+    const response = await fetch(`${API_URL}/${id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -82,7 +82,7 @@ export const deleteJob = async (id, token) => {
   }
 
   try {
-    const response = await fetch(`http://localhost:5000/jobs/${id}`, {
+    const response = await fetch(`${API_URL}/${id}`, {
       method: "DELETE",
       headers: {
         'Authorization': `Bearer ${token}`, // ✅ Add this
