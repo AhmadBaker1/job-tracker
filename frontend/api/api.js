@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:5000'; // URL of the API
+const API_URL = 'https://job-tracker-backend-6c2x.onrender.com'; // URL of the API
 
 export const fetchServerStatus = async () => {
     try {
