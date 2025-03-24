@@ -21,7 +21,7 @@ const SignUp = ({ onSwitch }) => {
     console.log("Submitting sign up with:", formData);
     
     try {
-      const res = await fetch("http://localhost:5000/api/auth/register", {
+      const res = await fetch("https://job-tracker-backend-6c2x.onrender.com/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
