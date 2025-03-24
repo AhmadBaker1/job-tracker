@@ -17,7 +17,7 @@ pool.connect()
 const app = express(); // Create an Express app
 app.use(cors()); // Enable CORS so the frontend can send requests
 app.use(express.json()); // for API requests
-app.use('/', jobRoutes);
+app.use('/api/jobs', jobRoutes);
 app.use("/api/auth", authRoutes); // Use auth routes
 
 // Test Route using (GET /)
