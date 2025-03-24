@@ -5,7 +5,7 @@ import authenticateToken from '../middleware/authMiddleware.js';
 const router = express.Router();
 
 // ✅ 1️⃣ Fetch jobs for the logged-in user
-router.get('/jobs', authenticateToken, async (req, res) => {
+router.get('/', authenticateToken, async (req, res) => {
     try {
         const userId = req.user.id; // ✅ Fix here
         const jobs = await pool.query("SELECT * FROM jobs WHERE user_id = $1", [userId]);
@@ -17,7 +17,7 @@ router.get('/jobs', authenticateToken, async (req, res) => {
 });
 
 // ✅ 2️⃣ Add a job (linked to the logged-in user)
-router.post('/jobs', authenticateToken, async (req, res) => {
+router.post('/', authenticateToken, async (req, res) => {
     console.log("🔥 Inside POST /jobs");
     console.log("🧑‍💻 req.user:", req.user);
     const userId = req.user.id;
@@ -42,7 +42,7 @@ router.post('/jobs', authenticateToken, async (req, res) => {
 
 
 // ✅ 3️⃣ Update a job (only by the job owner)
-router.put('/jobs/:id', authenticateToken, async (req, res) => {
+router.put('/:id', authenticateToken, async (req, res) => {
     try {
         const { id } = req.params;  // Extract job ID
         const { company, position, status, notes } = req.body;
@@ -73,7 +73,7 @@ router.put('/jobs/:id', authenticateToken, async (req, res) => {
 
 
 // ✅ 4️⃣ Delete a job (only by the job owner)
-router.delete('/jobs/:id', authenticateToken, async (req, res) => {
+router.delete('/:id', authenticateToken, async (req, res) => {
     try {
         const { id } = req.params;
         const userId = req.user.id;
