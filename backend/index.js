@@ -3,7 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import jobRoutes from './routes/jobRoutes.js'; // ✅ No curly braces for default export
 import authRoutes from "./routes/authRoutes.js"; // ✅ No curly braces for default export
-import { pool } from "./db.js";
+import pool from "./db.js";
 
 
 
